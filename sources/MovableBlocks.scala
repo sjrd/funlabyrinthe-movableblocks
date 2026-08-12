@@ -20,13 +20,13 @@ class MovableBlock(using ComponentInit) extends PosComponent {
     isDestSquareValid(target())
       && target.posComponentsBottomUp.isEmpty
 
-  protected def isMoveAllowed(context: MoveContext, target: SquareRef): Boolean =
+  protected def isMoveAllowed(context: EnteringContext, target: SquareRef): Boolean =
     isDestRefValid(target)
 
-  override def hookPushing(context: MoveContext): Unit = {
+  override def hookPushing(context: EnteringContext): Unit = {
     import context.*
 
-    val target = context.dest.get +> context.player.direction.get
+    val target = pos +> player.direction
     if isMoveAllowed(context, target) then
       applyMove(context, target)
       hooked = false
@@ -34,7 +34,7 @@ class MovableBlock(using ComponentInit) extends PosComponent {
       context.cancel()
   }
 
-  protected def applyMove(context: MoveContext, target: SquareRef): Unit =
+  protected def applyMove(context: EnteringContext, target: SquareRef): Unit =
     position = Some(target)
 }
 
@@ -60,13 +60,13 @@ class ConstrainedMovableBlock(using ComponentInit) extends AnchoredMovableBlock 
   @noinspect
   var movesDoneSoFar: Int = 0
 
-  override protected def isMoveAllowed(context: MoveContext, target: SquareRef): Boolean =
+  override protected def isMoveAllowed(context: EnteringContext, target: SquareRef): Boolean =
     super.isMoveAllowed(context, target)
-      && (canCrossZones || target.zone == context.dest.get.zone)
-      && allowedDirs.contains(context.player.direction.get)
+      && (canCrossZones || target.zone == context.dest.zone)
+      && allowedDirs.contains(context.player.direction)
       && (maximumMoveCount < 0 || movesDoneSoFar < maximumMoveCount)
 
-  override protected def applyMove(context: MoveContext, target: SquareRef): Unit =
+  override protected def applyMove(context: EnteringContext, target: SquareRef): Unit =
     super.applyMove(context, target)
     movesDoneSoFar += 1
 }
