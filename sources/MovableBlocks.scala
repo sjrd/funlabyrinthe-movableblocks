@@ -43,7 +43,7 @@ class AnchoredMovableBlock(using ComponentInit) extends MovableBlock {
   var originalPosition: Option[SquareRef] = None
 
   override protected def startGame(): Unit =
-    fixThere()
+    originalPosition = position
 
   def reset(): Unit =
     position = originalPosition
@@ -69,4 +69,12 @@ class ConstrainedMovableBlock(using ComponentInit) extends AnchoredMovableBlock 
   override protected def applyMove(context: EnteringContext, target: SquareRef): Unit =
     super.applyMove(context, target)
     movesDoneSoFar += 1
+
+  override def reset(): Unit =
+    super.reset()
+    movesDoneSoFar = 0
+
+  override def fixThere(): Unit =
+    super.fixThere()
+    maximumMoveCount = 0
 }
